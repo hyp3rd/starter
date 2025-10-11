@@ -6,6 +6,7 @@
         "*.svg",
         "**/dist/**",
         "**/.git/**",
+        "go.sum",
         "**/.venv/**",
         "**/__pycache__/**",
         "**/*.pyc",
@@ -86,8 +87,5 @@
         "xlarge"
     ],
     "ignoreWords": [],
-    "import": [
-        "go.sum",
-        "go.mod"
-    ]
+    "import": [],
 }
