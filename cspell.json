@@ -45,6 +45,7 @@
         "gofmt",
         "gofumpt",
         "goimports",
+        "golines",
         "gomod",
         "gomoddirectives",
         "GOPATH",
@@ -87,5 +88,5 @@
         "xlarge"
     ],
     "ignoreWords": [],
-    "import": [],
+    "import": []
 }
