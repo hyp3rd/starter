@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package api.core.v1;
+
+option go_package = "github.com/hyp3rd/starter/pkg/api/core/v1;corev1";
+
+service HealthService {
+  rpc Check(HealthServiceCheckRequest) returns (HealthServiceCheckResponse);
+}
+
+message HealthServiceCheckRequest {}
+
+message HealthServiceCheckResponse {
+  string status = 1;
+  string version = 2;
+}

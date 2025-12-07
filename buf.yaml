@@ -1,0 +1,15 @@
+---
+version: v2
+name: buf.build/hyp3rd/starter
+
+lint:
+  use:
+    - STANDARD
+    - PACKAGE_VERSION_SUFFIX
+    - ENUM_ZERO_VALUE_SUFFIX
+    - SERVICE_SUFFIX
+  ignore:
+    - .trunk
+breaking:
+  use:
+    - FILE

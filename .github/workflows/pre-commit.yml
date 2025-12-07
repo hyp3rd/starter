@@ -1,0 +1,31 @@
+---
+name: pre-commit
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+          check-latest: true
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Install Go tools for hooks
+        run: |
+          go install github.com/daixiang0/gci@latest
+          go install mvdan.cc/gofumpt@latest
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v2.7.1
+      - name: Run pre-commit
+        run: pre-commit run --all-files

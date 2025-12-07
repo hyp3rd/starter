@@ -1,0 +1,30 @@
+module github.com/hyp3rd/starter
+
+go 1.25.4
+
+require (
+	github.com/gofiber/fiber/v3 v3.0.0-rc.3
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
+	google.golang.org/grpc v1.77.0
+	google.golang.org/protobuf v1.36.10
+)
+
+require (
+	github.com/andybalholm/brotli v1.2.0 // indirect
+	github.com/gofiber/schema v1.6.0 // indirect
+	github.com/gofiber/utils/v2 v2.0.0-rc.4 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/philhofer/fwd v1.2.0 // indirect
+	github.com/tinylib/msgp v1.6.1 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasthttp v1.68.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
+)

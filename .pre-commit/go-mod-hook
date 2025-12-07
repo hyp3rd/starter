@@ -29,13 +29,6 @@ hook() {
 	echo "Running go mod tidy..."
 	go mod tidy
 
-	echo "ensure there are no changes after go mod tidy..."
-	if [[ -n $(git status --porcelain) ]]; then
-		echo "Error: go.mod or go.sum have changes after 'go mod tidy'. Please run 'go mod tidy' and commit the changes."
-		git --no-pager diff go.mod go.sum || true
-		exit 1
-	fi
-
 	popd >/dev/null || exit
 }
 

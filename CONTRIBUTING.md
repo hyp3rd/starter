@@ -12,6 +12,7 @@ If you want to directly contribute to the project by adding new tools, updating 
 
 - **Fork the Repository:** Start by forking the project repository into your GitHub account.
 - **Create a Branch:** Create a new branch in your forked repository. It's good practice to name the branch according to the feature or fix you're implementing.
+- **Branch naming suggestion:** `feat/<scope>`, `fix/<scope>`, or `chore/<scope>`.
 - **Make Your Changes:** Add, edit, or delete files in your branch to implement the changes you want to make.
 - **Commit Your Changes:** Make sure to write clear, concise commit messages describing your changes.
 - **Push Your Changes:** Push your branch and its new commits to your forked repository on GitHub.
@@ -30,5 +31,7 @@ To ensure that contributions are consistent and aligned with the project's objec
 **Follow Best Practices:** When contributing code, adhere to the coding style and practices established in the project.
 
 **Provide Detailed Information:** When reporting issues or submitting pull requests, provide as much relevant information as possible. This will help maintainers and other contributors understand your changes or your problems.
+
+**Ship with validation:** Run `make lint test` locally before raising a pull request. Include tests for new functionality and update documentation when tooling or workflows change.
 
 **Respect Others:** Be kind and respectful towards other community members. Avoid disrespectful language and behavior.

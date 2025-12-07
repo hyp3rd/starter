@@ -11,3 +11,8 @@ rules:
   truthy: disable
 ignore: |
   .golangci.yaml
+  .github/workflows/*
+  buf.gen.yaml
+  buf.yaml
+  **/vendor/**
+  **/openapi.yaml

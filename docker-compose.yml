@@ -1,0 +1,13 @@
+---
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 8000
+      APP_VERSION: ${APP_VERSION:-dev}
+    ports:
+      - "8000:8000"
+    command: ["/app"]
