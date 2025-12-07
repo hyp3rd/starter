@@ -1,6 +1,8 @@
 # Go Project Starter Template
 
-Opinionated Go starter with Fiber v3, pre-commit hooks, linting, testing, proto tooling, Docker, and CI skeletons. Version pins in this template are intentional—do not change them during setup.
+[![lint](https://github.com/hyp3rd/starter/actions/workflows/lint.yml/badge.svg)](https://github.com/hyp3rd/starter/actions/workflows/lint.yml)
+
+Opinionated Go starter with Fiber v3, pre-commit hooks, linting, testing, proto tooling, Docker, and CI skeletons. Version pins in this template are intentional. Do not change them during setup.
 
 ## Quick Start
 
