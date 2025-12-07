@@ -66,6 +66,8 @@ This will install:
 - `gci` - Go import formatter
 - `gofumpt` - Stricter gofmt
 - `golangci-lint` - Comprehensive linter
+- `govulncheck` - Reports known vulnerabilities that affect Go code. It uses static analysis of source code or a binary's symbol table to narrow down reports.
+- `gosec` - Go Security Checker Inspects source code for security problems by scanning the Go AST and SSA code representation.
 - `staticcheck` - Advanced static analysis
 - `pre-commit` - Git hook framework
 
