@@ -6,25 +6,6 @@ GOFILES = $(shell find . -type f -name '*.go' -not -path "./pkg/api/*" -not -pat
 
 BUF_VERSION = v1.61.0
 
-# Debug mode is off by default
-debug ?= 0
-arch = amd64
-ifeq ($(debug), 1)
-	arch = arm64
-endif
-
-core_scale ?= 1
-
-COMPOSE_FILES := -f compose.yaml
-# ifneq ($(strip $(core_scale)),1)
-# COMPOSE_FILES += -f compose.core-scaled.yaml
-# endif
-
-COMPOSE_SCALE :=
-ifneq ($(strip $(core_scale)),1)
-COMPOSE_SCALE := --scale core=$(core_scale)
-endif
-
 test:
 	RUN_INTEGRATION_TEST=yes go test -v -timeout 5m -cover ./...
 

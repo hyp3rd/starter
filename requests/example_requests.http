@@ -1,0 +1,50 @@
+@hostname = {{$dotenv HOSTNAME}}
+@port = {{$dotenv PORT}}
+@protocol = {{$dotenv PROTOCOL}}
+@host = {{protocol}}://{{hostname}}:{{port}}
+@v1_url = {{host}}{{$dotenv API_URL_V1}}
+
+@endpoint = example
+@service_name = example-service-name
+
+@contentType = application/json
+@preloadFilter = Taxonomy,Links
+
+@page = 1
+@limit = 50
+
+@where_clause = consumer_facing:true|owner:<OWNER>
+
+@order_by = created_at:desc
+
+# @name getAllEntities
+GET {{v1_url}}/{{endpoint}}?preload={{preloadFilter}}&limit=500 HTTP/1.1
+Content-Type: {{contentType}}
+
+###
+
+# @name getEntitiesWithFilters
+GET {{v1_url}}/{{endpoint}}?preload={{preloadFilter}}&page={{page}}&limit={{limit}}&where={{where_clause}}&order_by={{order_by}} HTTP/1.1
+Content-Type: {{contentType}}
+
+###
+
+# @name getEntity
+GET {{v1_url}}/{{endpoint}}/{{service_name}}?preload={{preloadFilter}} HTTP/1.1
+Content-Type: {{contentType}}
+
+@product_release_id = {{getEntity.response.body.$.data.id}}
+
+###
+
+# @name updateEntity
+PATCH {{v1_url}}/{{endpoint}}/{{product_release_id}} HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "status": {
+    "consumerFacing": false,
+    "state": "Live",
+    "endOfLife": "2027-11-30T00:00:00Z"
+  }
+}

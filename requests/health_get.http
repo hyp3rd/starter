@@ -1,0 +1,12 @@
+@hostname = {{$dotenv HOSTNAME}}
+@port = {{$dotenv PORT}}
+@protocol = {{$dotenv PROTOCOL}}
+@host = {{protocol}}://{{hostname}}:{{port}}
+@v1_url = {{host}}{{$dotenv API_URL_V1}}
+@contentType = application/json
+
+# @name getHealth
+GET {{host}}/health HTTP/1.1
+Content-Type: {{contentType}}
+
+###

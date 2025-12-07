@@ -30,6 +30,7 @@
         "daixiang",
         "Debugf",
         "depguard",
+        "dotenv",
         "EDITMSG",
         "embeddedstructfieldcheck",
         "envoyproxy",
