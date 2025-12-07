@@ -23,7 +23,7 @@ hook() {
 
 	# run the pre-commit hook
 	pushd "${root_dir}" || exit
-		GOTOOLCHAIN=go1.25.2+auto go test -v -cover ./... || exit 1
+		go test -v -cover ./... || exit 1
 	popd >/dev/null || exit
 }
 
