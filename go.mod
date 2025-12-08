@@ -1,6 +1,6 @@
 module github.com/hyp3rd/starter
 
-go 1.25.4
+go 1.25.5
 
 require (
 	github.com/gofiber/fiber/v3 v3.0.0-rc.3
