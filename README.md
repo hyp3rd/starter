@@ -19,7 +19,7 @@ Opinionated Go starter with Fiber v3, pre-commit hooks, linting, testing, proto 
     ```bash
     make prepare-toolchain
     # If you need proto/gRPC/OpenAPI
-    make prepare-proto-tools
+    PROTO_ENABLED=true make prepare-proto-tools
     ```
 
 1. Run quality gates and sample app
@@ -33,6 +33,7 @@ Opinionated Go starter with Fiber v3, pre-commit hooks, linting, testing, proto 
 1. Optional: Docker and Compose
 
     ```bash
+    cp .env.example .env   # shared runtime config for compose/requests
     docker build -t starter-app .
     docker compose up --build
     ```
@@ -51,18 +52,21 @@ Opinionated Go starter with Fiber v3, pre-commit hooks, linting, testing, proto 
 
 - **Module path & imports**: `setup-project.sh` replaces `#PROJECT` in Makefile and hooks. If you change the module later, rerun the script with `--module`.
 - **Go version**: Target Go 1.25.x (keep pins as provided).
-- **GCI prefix**: Set by the setup script; defaults to `#PROJECT`.
+- **GCI prefix**: Set by the setup script; defaults to `#PROJECT` (see `.project-settings.env`).
+- **Project settings**: `.project-settings.env` is the single source for tool versions, Go version, proto toggle, and GCI prefix; CI and hooks source it.
+- **Proto toggle**: Set `PROTO_ENABLED=false` in `.project-settings.env` to skip proto lint/format/CI. When enabled, run `make prepare-proto-tools`.
 - **Proto**: Copy/edit `api/core/v1/health.proto`. Generate stubs with `make proto`. Generated files land in `pkg/api/core/v1/`.
-- **HTTP request examples**: `requests/*.http` read variables from `requests/.env` (copy from `.env-example`). `health_get.http` hits `/health`.
-- **Docker**: Override `APP_VERSION`, `HOSTNAME`, `PORT` in `docker-compose.yml` or `docker run -e`.
+- **HTTP request examples**: `requests/*.http` read variables from `requests/.env` (copy from `.env-example` or reuse the root `.env`). `health_get.http` hits `/health`.
+- **Docker**: Override `APP_VERSION`, `HOSTNAME`, `PORT` via `.env` (used by docker compose) or `docker run -e`. Healthchecks call `/health` via the app binary.
 
 ## Make Targets (high level)
 
 - `prepare-toolchain` — install core tools (gci, gofumpt, golangci-lint, staticcheck, govulncheck, gosec)
-- `prepare-proto-tools` — install buf + protoc plugins (optional)
+- `prepare-proto-tools` — install buf + protoc plugins (optional, controlled by PROTO_ENABLED)
+- `init` — run setup-project.sh with current module and install tooling (respects PROTO_ENABLED)
 - `lint` — gci, gofumpt, staticcheck, golangci-lint
 - `test` / `test-race` / `bench`
-- `vet`, `sec`, `proto`, `run`, `update-deps`, `update-toolchain`
+- `vet`, `sec`, `proto`, `run`, `run-container`, `update-deps`, `update-toolchain`
 
 Run `make help` for the full list.
 
@@ -76,9 +80,9 @@ Run `make help` for the full list.
 
 ## CI/CD (templates)
 
-- `.github/workflows/lint.yml` — gofumpt, gci, staticcheck, golangci-lint
-- `.github/workflows/test.yml` — unit tests (race + coverage artifact)
-- `.github/workflows/proto.yml` — buf format/lint/generate
+- `.github/workflows/lint.yml` — gofumpt, gci, staticcheck, golangci-lint (caches + tidy check)
+- `.github/workflows/test.yml` — unit tests (race + coverage artifact, caches)
+- `.github/workflows/proto.yml` — buf format/lint/generate (skips when `PROTO_ENABLED=false`)
 - `.github/workflows/security.yml` — govulncheck + gosec
 - `.github/workflows/pre-commit.yml` — pre-commit hooks on all files
 - `.github/dependabot.yml` — Go modules + GitHub Actions updates
@@ -88,6 +92,16 @@ Run `make help` for the full list.
 - Tests required for changes; run `make lint test` before PRs.
 - Suggested branch naming: `feat/<scope>`, `fix/<scope>`, `chore/<scope>`.
 - Update docs when altering tooling, Make targets, or setup steps.
+
+## Environment Files
+
+- `.project-settings.env` — versions and prefixes for tooling/CI/Docker.
+- `.env.example` — runtime defaults for the app/compose/requests. Copy to `.env` for local runs and docker compose. Copy to `requests/.env` if you prefer a dedicated file.
+
+## PR Expectations
+
+- CI jobs to pass: lint, test, security, pre-commit (and proto when `PROTO_ENABLED=true`).
+- Run `make lint test` locally before opening a PR; include docs updates when changing tooling or workflows.
 
 ## Troubleshooting
 

@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.25
+ARG GO_VERSION=1.25.4
 
 FROM golang:${GO_VERSION} AS builder
 
@@ -16,5 +16,9 @@ FROM gcr.io/distroless/static-debian13:nonroot AS runtime
 COPY --from=builder /bin/app /app
 
 EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/app","-healthcheck"]
+
+USER nonroot:nonroot
 
 ENTRYPOINT ["/app"]

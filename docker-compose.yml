@@ -4,10 +4,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
-      HOSTNAME: 0.0.0.0
-      PORT: 8000
+      HOSTNAME: ${HOSTNAME:-0.0.0.0}
+      PORT: ${PORT:-8000}
       APP_VERSION: ${APP_VERSION:-dev}
     ports:
       - "8000:8000"
     command: ["/app"]
+    healthcheck:
+      test: ["/app", "-healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

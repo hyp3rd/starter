@@ -155,6 +155,8 @@ FILES_TO_UPDATE=(
 	"cmd/app/main.go"
 	"buf.gen.yaml"
 	"api/core/v1/health.proto"
+	".project-settings.env"
+	".github/workflows/lint.yml"
 )
 
 # Check if files exist and replace placeholders
@@ -191,6 +193,14 @@ for file in "${FILES_TO_UPDATE[@]}"; do
 			rm -f "$file.tmp"
 			updated="yes"
 			echo "  ✓ Set module to $REPO_NAME"
+		fi
+
+		if [[ "$file" == ".project-settings.env" ]] && grep -q "^GCI_PREFIX=" "$file"; then
+			ensure_backup
+			sed -i.tmp "s|^GCI_PREFIX=.*|GCI_PREFIX=$REPO_NAME|" "$file"
+			rm -f "$file.tmp"
+			updated="yes"
+			echo "  ✓ Set GCI_PREFIX to $REPO_NAME"
 		fi
 
 		if [[ -z "$updated" ]]; then

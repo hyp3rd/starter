@@ -3,8 +3,7 @@ include .project-settings.env
 GOLANGCI_LINT_VERSION ?= v2.7.1
 BUF_VERSION ?= v1.61.0
 GO_VERSION ?= 1.25.4
-GCI_PREFIX ?= github.com/hyp3rd/starter
-PROTO_ENABLED ?= true
+GCI_PREFIX ?= #PROJECT
 
 GOFILES = $(shell find . -type f -name '*.go' -not -path "./pkg/api/*" -not -path "./vendor/*" -not -path "./.gocache/*" -not -path "./.git/*")
 
@@ -29,11 +28,6 @@ run:
 run-container:
 	docker compose down -v
 	COMPOSE_BAKE=true docker compose up --build
-
-init:
-	./setup-project.sh --module $(shell grep "^module " go.mod | awk '{print $$2}')
-	$(MAKE) prepare-toolchain
-	@if [ "$(PROTO_ENABLED)" = "true" ]; then $(MAKE) prepare-proto-tools; fi
 
 prepare-toolchain: prepare-base-tools
 
@@ -132,14 +126,12 @@ update-toolchain:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 
 lint: prepare-toolchain
-	@echo "Proto lint/format (if enabled and buf is installed)..."
-	@if [ "$(PROTO_ENABLED)" = "true" ] && command -v buf >/dev/null 2>&1; then \
+	@echo "Proto lint/format (if buf is installed)..."
+	@if command -v buf >/dev/null 2>&1; then \
 		buf lint; \
 		buf format -w; \
-	elif [ "$(PROTO_ENABLED)" = "true" ]; then \
-		echo "buf not installed, skipping proto lint/format (run make prepare-proto-tools to enable)"; \
 	else \
-		echo "PROTO_ENABLED is not true; skipping proto lint/format"; \
+		echo "buf not installed, skipping proto lint/format (run make prepare-proto-tools to enable)"; \
 	fi
 
 	@echo "Running gci..."
@@ -189,7 +181,6 @@ help:
 	@echo "  prepare-toolchain\t\tInstall required development tools (core tooling)"
 	@echo "  prepare-proto-tools\t\tInstall protobuf tooling (optional)"
 	@echo "  update-toolchain\t\tUpdate all development tools to their latest versions"
-	@echo "  init\t\t\t\tRun setup-project.sh, install tooling, and proto tools if enabled"
 	@echo
 	@echo "Testing commands:"
 	@echo "  test\t\t\t\tRun all tests in the project"
@@ -205,4 +196,4 @@ help:
 	@echo
 	@echo
 	@echo "For more information, see the project README."
-.PHONY: prepare-toolchain prepare-proto-tools prepare-base-tools update-toolchain test bench vet update-deps lint sec help run run-container init proto proto-update proto-lint proto-generate proto-format proto-breaking
+.PHONY: prepare-toolchain prepare-proto-tools prepare-base-tools update-toolchain test bench vet update-deps lint sec help run run-container proto proto-update proto-lint proto-generate proto-format proto-breaking
