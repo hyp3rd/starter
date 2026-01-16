@@ -32,6 +32,7 @@ jobs:
         uses: bufbuild/buf-setup-action@v1
         with:
           version: "${{ steps.settings.outputs.buf_version }}"
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - name: Lint protos
         if: env.PROTO_ENABLED != 'false'
         run: buf lint
