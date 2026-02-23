@@ -4,23 +4,30 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/hyp3rd/ewrap"
 )
 
 const (
 	// defaultPort is the default port if not set in env.
 	defaultPort = "8000"
+	// maxPort is the maximum valid port number.
+	maxPort = 65535
 	// probeTimeout is the timeout for health probes.
 	probeTimeout = 5 * time.Second
 	// DefaultVersion is the default app version if not set in env.
 	DefaultVersion = "dev"
+	// defaultSeparator is the default separator between host and port.
+	defaultSeparator = ":"
 )
 
 // ErrProbeFailed indicates the health probe returned a non-200 status.
@@ -36,10 +43,10 @@ func AddrFromEnv() string {
 	}
 
 	if host == "" {
-		return ":" + port
+		return defaultSeparator + port
 	}
 
-	return host + ":" + port
+	return host + defaultSeparator + port
 }
 
 // VersionFromEnv returns the app version from APP_VERSION env or default.
@@ -68,29 +75,107 @@ func New() *fiber.App {
 
 // Probe performs an HTTP GET against /health on the provided listen address.
 func Probe(ctx context.Context, listenAddr string, logger *slog.Logger) error {
-	target := listenAddr
-	if strings.HasPrefix(target, ":") {
-		target = "127.0.0.1" + target
+	target, err := buildProbeTarget(ctx, listenAddr)
+	if err != nil {
+		return err
 	}
-
-	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
-		target = "http://" + target
-	}
-
-	target = strings.TrimRight(target, "/") + "/health"
 
 	client := http.Client{
 		Timeout: probeTimeout,
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
+	return executeProbeRequest(ctx, target, &client, logger)
+}
+
+func buildProbeTarget(ctx context.Context, listenAddr string) (*url.URL, error) {
+	host, port, err := splitListenAddress(listenAddr)
 	if err != nil {
-		return fmt.Errorf("failed to create health probe request: %w", err)
+		return nil, err
 	}
 
+	err = validateProbeHost(ctx, host)
+	if err != nil {
+		return nil, err
+	}
+
+	normalizedPort, err := normalizePort(port)
+	if err != nil {
+		return nil, err
+	}
+
+	return &url.URL{
+		Scheme: "http",
+		Host:   net.JoinHostPort("127.0.0.1", normalizedPort),
+		Path:   "/health",
+	}, nil
+}
+
+func splitListenAddress(listenAddr string) (host, port string, err error) {
+	if strings.Contains(listenAddr, "://") {
+		return "", "", ewrap.New("listen address must not include a URL scheme")
+	}
+
+	if after, ok := strings.CutPrefix(listenAddr, defaultSeparator); ok {
+		return "", after, nil
+	}
+
+	host, port, err = net.SplitHostPort(listenAddr)
+	if err != nil {
+		return "", "", ewrap.Wrap(err, "invalid listen address")
+	}
+
+	return host, port, nil
+}
+
+func validateProbeHost(ctx context.Context, host string) error {
+	if host == "" || host == "0.0.0.0" || host == "::" || host == "[::]" || strings.EqualFold(host, "localhost") {
+		return nil
+	}
+
+	resolved, err := net.DefaultResolver.LookupIPAddr(ctx, host)
+	if err != nil {
+		return ewrap.Wrap(err, "failed to resolve health probe hostname")
+	}
+
+	if len(resolved) == 0 {
+		return ewrap.Newf("no IP addresses found for hostname: %s", host)
+	}
+
+	for _, ipAddr := range resolved {
+		if !isAllowedIP(ipAddr.IP) {
+			return ewrap.Newf("health probe hostname resolves to disallowed address: %s", ipAddr.IP)
+		}
+	}
+
+	return nil
+}
+
+func normalizePort(port string) (string, error) {
+	if port == "" {
+		return "", ewrap.New("listen port is empty")
+	}
+
+	parsedPort, err := strconv.Atoi(port)
+	if err != nil {
+		return "", ewrap.Wrap(err, "invalid listen port")
+	}
+
+	if parsedPort < 1 || parsedPort > maxPort {
+		return "", ewrap.Newf("listen port out of range: %d", parsedPort)
+	}
+
+	return strconv.Itoa(parsedPort), nil
+}
+
+func executeProbeRequest(ctx context.Context, target *url.URL, client *http.Client, logger *slog.Logger) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target.String(), nil)
+	if err != nil {
+		return ewrap.Wrap(err, "failed to create health probe request")
+	}
+	// #nosec G704 -- target is canonicalized to loopback-only in buildProbeTarget
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("health probe failed: %w", err)
+		return ewrap.Wrap(err, "health probe failed")
 	}
 
 	defer func() {
@@ -105,4 +190,11 @@ func Probe(ctx context.Context, listenAddr string, logger *slog.Logger) error {
 	}
 
 	return nil
+}
+
+// isAllowedIP checks if an IP address is allowed for health probes.
+// Only allows localhost/127.0.0.1 to prevent SSRF attacks.
+func isAllowedIP(ip net.IP) bool {
+	// Only allow loopback addresses (127.0.0.1 and ::1)
+	return ip.IsLoopback()
 }

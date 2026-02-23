@@ -97,6 +97,7 @@
     "nolint",
     "nonamedreturns",
     "nonroot",
+    "nosec",
     "pipefail",
     "popd",
     "protoc",
