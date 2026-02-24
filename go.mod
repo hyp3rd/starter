@@ -3,7 +3,7 @@ module github.com/hyp3rd/starter
 go 1.26.0
 
 require (
-	github.com/gofiber/fiber/v3 v3.0.0
+	github.com/gofiber/fiber/v3 v3.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0
 	github.com/hyp3rd/ewrap v1.3.7
 	google.golang.org/grpc v1.79.1
