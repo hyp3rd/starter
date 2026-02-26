@@ -2,6 +2,7 @@ package server_test
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -110,5 +111,20 @@ func TestProbeFails(t *testing.T) {
 	err := server.Probe(context.TODO(), "127.0.0.1:0", logger)
 	if err == nil {
 		t.Fatal("expected probe to fail")
+	}
+}
+
+func TestProbeRejectsNonLocalTarget(t *testing.T) {
+	t.Parallel()
+
+	logger := provideLogger(t)
+
+	err := server.Probe(context.TODO(), "example.com:8080", logger)
+	if err == nil {
+		t.Fatal("expected probe to reject non-local target")
+	}
+
+	if !errors.Is(err, server.ErrInvalidProbeTarget) {
+		t.Fatalf("expected ErrInvalidProbeTarget, got: %v", err)
 	}
 }

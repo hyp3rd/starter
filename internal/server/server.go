@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -25,6 +27,9 @@ const (
 
 // ErrProbeFailed indicates the health probe returned a non-200 status.
 var ErrProbeFailed = errors.New("health probe failed with non-200 status")
+
+// ErrInvalidProbeTarget indicates the health probe target is not a local address.
+var ErrInvalidProbeTarget = errors.New("health probe target must be local")
 
 // AddrFromEnv returns the listen address built from HOSTNAME and PORT envs.
 func AddrFromEnv() string {
@@ -68,19 +73,17 @@ func New() *fiber.App {
 
 // Probe performs an HTTP GET against /health on the provided listen address.
 func Probe(ctx context.Context, listenAddr string, logger *slog.Logger) error {
-	target := listenAddr
-	if strings.HasPrefix(target, ":") {
-		target = "127.0.0.1" + target
+	target, err := probeTargetFromListenAddr(listenAddr)
+	if err != nil {
+		return err
 	}
-
-	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
-		target = "http://" + target
-	}
-
-	target = strings.TrimRight(target, "/") + "/health"
 
 	client := http.Client{
 		Timeout: probeTimeout,
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			// A health probe should not follow redirects to another location.
+			return http.ErrUseLastResponse
+		},
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
@@ -88,6 +91,7 @@ func Probe(ctx context.Context, listenAddr string, logger *slog.Logger) error {
 		return fmt.Errorf("failed to create health probe request: %w", err)
 	}
 
+	// #nosec G704 -- target is validated as local-only and redirects are disabled
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("health probe failed: %w", err)
@@ -105,4 +109,73 @@ func Probe(ctx context.Context, listenAddr string, logger *slog.Logger) error {
 	}
 
 	return nil
+}
+
+func probeTargetFromListenAddr(listenAddr string) (string, error) {
+	target := listenAddr
+	if strings.HasPrefix(target, ":") {
+		target = "127.0.0.1" + target
+	}
+
+	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
+		target = "http://" + target
+	}
+
+	parsed, err := url.Parse(target)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse health probe target: %w", err)
+	}
+
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return "", fmt.Errorf("%w: unsupported scheme %q", ErrInvalidProbeTarget, parsed.Scheme)
+	}
+
+	host := parsed.Hostname()
+	if host == "" {
+		return "", fmt.Errorf("%w: missing host", ErrInvalidProbeTarget)
+	}
+
+	normalizedHost, err := normalizeProbeHost(host)
+	if err != nil {
+		return "", err
+	}
+
+	port := parsed.Port()
+	if port != "" {
+		parsed.Host = net.JoinHostPort(normalizedHost, port)
+	} else {
+		parsed.Host = normalizedHost
+	}
+
+	parsed.Path = "/health"
+	parsed.RawPath = ""
+	parsed.RawQuery = ""
+	parsed.Fragment = ""
+
+	return parsed.String(), nil
+}
+
+func normalizeProbeHost(host string) (string, error) {
+	if strings.EqualFold(host, "localhost") {
+		return "localhost", nil
+	}
+
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return "", fmt.Errorf("%w: %q", ErrInvalidProbeTarget, host)
+	}
+
+	if ip.IsUnspecified() {
+		if ip.To4() != nil {
+			return "127.0.0.1", nil
+		}
+
+		return "::1", nil
+	}
+
+	if ip.IsLoopback() {
+		return ip.String(), nil
+	}
+
+	return "", fmt.Errorf("%w: %q", ErrInvalidProbeTarget, host)
 }

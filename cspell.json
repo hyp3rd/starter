@@ -87,6 +87,7 @@
     "nolint",
     "nonamedreturns",
     "nonroot",
+    "nosec",
     "popd",
     "protoc",
     "protocolbuffers",

@@ -1,8 +1,8 @@
 include .project-settings.env
 
-GOLANGCI_LINT_VERSION ?= v2.7.2
-BUF_VERSION ?= v1.61.0
-GO_VERSION ?= 1.25.5
+GOLANGCI_LINT_VERSION ?= v2.10.1
+BUF_VERSION ?= v1.66.0
+GO_VERSION ?= 1.26.0
 GCI_PREFIX ?= github.com/hyp3rd/starter
 PROTO_ENABLED ?= true
 
@@ -20,8 +20,7 @@ bench:
 	go test -bench=. -benchtime=3s -benchmem -run=^-memprofile=mem.out ./...
 
 update-deps:
-	go get -v -u ./...
-	go mod tidy
+	go get -u -t ./... && go mod tidy -v && go mod verify
 
 run:
 	go run ./cmd/app
