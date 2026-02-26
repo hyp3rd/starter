@@ -1,0 +1,111 @@
+---
+stages:
+  - verify
+  - lint
+  - test
+  - security
+
+variables:
+  GOPATH: "$CI_PROJECT_DIR/.go"
+  GOBIN: "$CI_PROJECT_DIR/.go/bin"
+  GOCACHE: "$CI_PROJECT_DIR/.cache/go-build"
+  GOMODCACHE: "$CI_PROJECT_DIR/.cache/go-mod"
+
+default:
+  # Keep this in sync with GO_VERSION in .project-settings.env.
+  image: golang:1.26.0
+  cache:
+    key:
+      files:
+        - go.sum
+    paths:
+      - .go/bin
+      - .cache/go-build
+      - .cache/go-mod
+  before_script:
+    - mkdir -p "$GOBIN" "$GOCACHE" "$GOMODCACHE"
+    - export PATH="$GOBIN:$PATH"
+    - if [ -f .project-settings.env ]; then set -a; . ./.project-settings.env; set +a; fi
+    - export GCI_PREFIX="${GCI_PREFIX:-$(go list -m)}"
+    - go version
+    - go mod download
+
+pre_commit_custom_hooks:
+  stage: verify
+  script:
+    - go install github.com/daixiang0/gci@latest
+    - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@"${GOLANGCI_LINT_VERSION:-v2.10.1}"
+    - ./.pre-commit/go-mod-hook
+    - ./.pre-commit/gci-hook
+    - |
+      if ! git diff --exit-code; then
+        git --no-pager diff --stat
+        echo "Custom pre-commit hooks modified files. Run pre-commit locally and commit the changes."
+        exit 1
+      fi
+    - ./.pre-commit/golangci-lint-hook
+    - ./.pre-commit/unit-test-hook
+
+lint:
+  stage: lint
+  script:
+    - go install github.com/daixiang0/gci@latest
+    - go install mvdan.cc/gofumpt@latest
+    - go install honnef.co/go/tools/cmd/staticcheck@latest
+    - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@"${GOLANGCI_LINT_VERSION:-v2.10.1}"
+    - go mod tidy
+    - git diff --exit-code go.mod go.sum
+    - |
+      GOFILES=$(find . -type f -name '*.go' \
+        -not -path "./pkg/api/*" \
+        -not -path "./vendor/*" \
+        -not -path "./.gocache/*" \
+        -not -path "./.git/*")
+      if [ -n "${GOFILES}" ]; then
+        gci write -s standard -s default -s blank -s dot -s "prefix(${GCI_PREFIX})" -s localmodule --skip-vendor --skip-generated ${GOFILES}
+        gofumpt -l -w ${GOFILES}
+      fi
+    - |
+      if ! git diff --exit-code; then
+        git --no-pager diff --stat
+        echo "Formatting changes detected. Run the formatting hooks locally and commit the result."
+        exit 1
+      fi
+    - staticcheck ./...
+    - golangci-lint run -v ./...
+
+unit_tests:
+  stage: test
+  script:
+    - go test -race -coverprofile=coverage.out ./...
+  artifacts:
+    when: always
+    paths:
+      - coverage.out
+
+security:
+  stage: security
+  script:
+    - go install golang.org/x/vuln/cmd/govulncheck@latest
+    - go install github.com/securego/gosec/v2/cmd/gosec@latest
+    - govulncheck ./...
+    - gosec -exclude-generated ./...
+
+proto:
+  stage: lint
+  script:
+    - |
+      if [ "${PROTO_ENABLED:-true}" = "false" ]; then
+        echo "PROTO_ENABLED=false, skipping proto checks."
+        exit 0
+      fi
+    - go install github.com/bufbuild/buf/cmd/buf@"${BUF_VERSION:-v1.66.0}"
+    - buf lint
+    - buf format -w
+    - buf generate
+    - |
+      if ! git diff --exit-code; then
+        git --no-pager diff --stat
+        echo "Proto generation or formatting changed files. Commit the generated output."
+        exit 1
+      fi
