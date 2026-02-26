@@ -134,6 +134,8 @@ echo ""
 echo "Module name: $REPO_NAME"
 echo ""
 
+REPO_NAMESPACE_GLOB="${REPO_NAME%/*}/*"
+
 # Initialize go module if it doesn't exist
 if [[ ! -f "go.mod" ]]; then
     echo "Initializing Go module..."
@@ -150,12 +152,14 @@ fi
 # Files to update
 FILES_TO_UPDATE=(
 	".pre-commit/gci-hook"
+	".golangci.yaml"
 	"Makefile"
 	"go.mod"
 	"cmd/app/main.go"
 	"buf.gen.yaml"
 	"api/core/v1/health.proto"
 	".project-settings.env"
+	".gitlab-ci.yml"
 	".github/workflows/lint.yml"
 )
 
@@ -177,6 +181,14 @@ for file in "${FILES_TO_UPDATE[@]}"; do
 			rm -f "$file.tmp"
 			updated="yes"
 			echo "  ✓ Replaced #PROJECT with $REPO_NAME"
+		fi
+
+		if grep -Fq "github.com/hyp3rd/*" "$file"; then
+			ensure_backup
+			sed -i.tmp "s|github.com/hyp3rd/\\*|$REPO_NAMESPACE_GLOB|g" "$file"
+			rm -f "$file.tmp"
+			updated="yes"
+			echo "  ✓ Replaced github.com/hyp3rd/* with $REPO_NAMESPACE_GLOB"
 		fi
 
 		if grep -q "github.com/hyp3rd/starter" "$file"; then
