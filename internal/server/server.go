@@ -4,25 +4,30 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/hyp3rd/ewrap"
 )
 
 const (
 	// defaultPort is the default port if not set in env.
 	defaultPort = "8000"
+	// maxPort is the maximum valid port number.
+	maxPort = 65535
 	// probeTimeout is the timeout for health probes.
 	probeTimeout = 5 * time.Second
 	// DefaultVersion is the default app version if not set in env.
 	DefaultVersion = "dev"
+	// defaultSeparator is the default separator between host and port.
+	defaultSeparator = ":"
 )
 
 // ErrProbeFailed indicates the health probe returned a non-200 status.
@@ -41,10 +46,10 @@ func AddrFromEnv() string {
 	}
 
 	if host == "" {
-		return ":" + port
+		return defaultSeparator + port
 	}
 
-	return host + ":" + port
+	return host + defaultSeparator + port
 }
 
 // VersionFromEnv returns the app version from APP_VERSION env or default.
@@ -86,15 +91,19 @@ func Probe(ctx context.Context, listenAddr string, logger *slog.Logger) error {
 		},
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
+	parsedPort, err := strconv.Atoi(port)
 	if err != nil {
-		return fmt.Errorf("failed to create health probe request: %w", err)
+		return "", ewrap.Wrap(err, "invalid listen port")
+	}
+
+	if parsedPort < 1 || parsedPort > maxPort {
+		return "", ewrap.Newf("listen port out of range: %d", parsedPort)
 	}
 
 	// #nosec G704 -- target is validated as local-only and redirects are disabled
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("health probe failed: %w", err)
+		return ewrap.Wrap(err, "health probe failed")
 	}
 
 	defer func() {
