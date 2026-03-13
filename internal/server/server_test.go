@@ -25,7 +25,7 @@ func TestHealth(t *testing.T) {
 
 	app := server.New()
 
-	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/health", nil)
 
 	resp, err := app.Test(req)
 	if err != nil {
