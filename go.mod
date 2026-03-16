@@ -5,7 +5,7 @@ go 1.26.1
 require (
 	github.com/gofiber/fiber/v3 v3.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0
-	github.com/hyp3rd/ewrap v1.3.7
+	github.com/hyp3rd/ewrap v1.3.8
 	google.golang.org/grpc v1.79.2
 	google.golang.org/protobuf v1.36.11
 )
