@@ -13,7 +13,7 @@ variables:
 
 default:
   # Keep this in sync with GO_VERSION in .project-settings.env.
-  image: golang:1.26.1
+  image: golang:1.26.2
   cache:
     key:
       files:
@@ -34,7 +34,7 @@ pre_commit_custom_hooks:
   stage: verify
   script:
     - go install github.com/daixiang0/gci@latest
-    - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@"${GOLANGCI_LINT_VERSION:-v2.11.3}"
+    - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@"${GOLANGCI_LINT_VERSION:-v2.11.4}"
     - ./.pre-commit/go-mod-hook
     - ./.pre-commit/gci-hook
     - |
@@ -52,7 +52,7 @@ lint:
     - go install github.com/daixiang0/gci@latest
     - go install mvdan.cc/gofumpt@latest
     - go install honnef.co/go/tools/cmd/staticcheck@latest
-    - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@"${GOLANGCI_LINT_VERSION:-v2.11.3}"
+    - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@"${GOLANGCI_LINT_VERSION:-v2.11.4}"
     - go mod tidy
     - git diff --exit-code go.mod go.sum
     - |
@@ -99,7 +99,7 @@ proto:
         echo "PROTO_ENABLED=false, skipping proto checks."
         exit 0
       fi
-    - go install github.com/bufbuild/buf/cmd/buf@"${BUF_VERSION:-v1.66.1}"
+    - go install github.com/bufbuild/buf/cmd/buf@"${BUF_VERSION:-v1.67.0}"
     - buf lint
     - buf format -w
     - buf generate
