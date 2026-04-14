@@ -6,7 +6,7 @@ require (
 	github.com/gofiber/fiber/v3 v3.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0
 	github.com/hyp3rd/ewrap v1.3.9
-	google.golang.org/grpc v1.79.2
+	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
 )
 
