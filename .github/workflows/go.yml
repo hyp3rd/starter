@@ -6,7 +6,7 @@ permissions:
 on:
     pull_request:
     push:
-        branches: [main]
+        branches: [ main ]
 
 jobs:
     build:
@@ -36,7 +36,8 @@ jobs:
                   path: |
                       ~/go/pkg/mod
                       ~/.cache/go-build
-                  key: ${{ runner.os }}-go-${{ steps.settings.outputs.go_version }}-${{ hashFiles('**/go.sum') }}
+                  key: ${{ runner.os }}-go-${{ steps.settings.outputs.go_version }}-${{
+                      hashFiles('**/go.sum') }}
                   restore-keys: |
                       ${{ runner.os }}-go-${{ steps.settings.outputs.go_version }}-
 

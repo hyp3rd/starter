@@ -4,7 +4,7 @@ name: lint
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   lint:
@@ -32,7 +32,8 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ steps.settings.outputs.go_version }}-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ steps.settings.outputs.go_version }}-${{
+            hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-${{ steps.settings.outputs.go_version }}-
       - name: Install tools
@@ -48,9 +49,14 @@ jobs:
           go mod tidy
           git diff --exit-code go.mod go.sum
       - name: gci
-        run: gci write -s standard -s default -s blank -s dot -s "prefix(${{ steps.settings.outputs.gci_prefix }})" -s localmodule --skip-vendor --skip-generated $(find . -type f -name '*.go' -not -path "./pkg/api/*" -not -path "./vendor/*" -not -path "./.gocache/*" -not -path "./.git/*")
+        run: gci write -s standard -s default -s blank -s dot -s "prefix(${{
+          steps.settings.outputs.gci_prefix }})" -s localmodule --skip-vendor
+          --skip-generated $(find . -type f -name '*.go' -not -path
+          "./pkg/api/*" -not -path "./vendor/*" -not -path "./.gocache/*" -not
+          -path "./.git/*")
       - name: gofumpt
-        run: gofumpt -l -w $(find . -type f -name '*.go' -not -path "./pkg/api/*" -not -path "./vendor/*" -not -path "./.gocache/*" -not -path "./.git/*")
+        run: gofumpt -l -w $(find . -type f -name '*.go' -not -path "./pkg/api/*" -not
+          -path "./vendor/*" -not -path "./.gocache/*" -not -path "./.git/*")
       - name: staticcheck
         run: staticcheck ./...
       - name: golangci-lint
