@@ -26,11 +26,11 @@ repos:
       - id: check-yaml
         files: .*\.(yaml|yml)$
         exclude: mkdocs.yml
-        args: [--allow-multiple-documents]
+        args: [ --allow-multiple-documents ]
       - id: requirements-txt-fixer
       - id: no-commit-to-branch
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.1
+    rev: v8.30.0
     hooks:
       - id: gitleaks
   - repo: https://github.com/adrienverge/yamllint.git
@@ -38,14 +38,14 @@ repos:
     hooks:
       - id: yamllint
         files: \.(yaml|yml)$
-        types: [file, yaml]
+        types: [ file, yaml ]
         entry: yamllint --strict -f parsable
   - repo: https://github.com/hadolint/hadolint
     rev: v2.14.0
     hooks:
       - id: hadolint-docker
   - repo: https://github.com/streetsidesoftware/cspell-cli
-    rev: v9.7.0
+    rev: v10.0.0
     hooks:
       # Spell check changed files
       - id: cspell
@@ -58,7 +58,7 @@ repos:
           - --no-summary
           - --files
           - .git/COMMIT_EDITMSG
-        stages: [commit-msg]
+        stages: [ commit-msg ]
         always_run: true
   - repo: https://github.com/markdownlint/markdownlint.git
     rev: v0.15.0
