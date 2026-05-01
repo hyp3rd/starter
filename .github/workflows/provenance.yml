@@ -3,7 +3,7 @@ name: provenance
 
 on:
   release:
-    types: [published]
+    types: [ published ]
   workflow_dispatch:
 
 jobs:
@@ -66,7 +66,7 @@ jobs:
             ${{ steps.archive.outputs.archive }}.pem
 
   provenance:
-    needs: [source]
+    needs: [ source ]
     permissions:
       actions: read
       contents: write

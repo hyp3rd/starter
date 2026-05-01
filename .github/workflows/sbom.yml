@@ -4,7 +4,7 @@ name: sbom
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
   schedule:
     - cron: "0 5 * * 1"
 
