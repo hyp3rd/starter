@@ -1,10 +1,10 @@
 module github.com/hyp3rd/starter
 
-go 1.26.2
+go 1.26.3
 
 require (
 	github.com/gofiber/fiber/v3 v3.2.0
-	github.com/hyp3rd/ewrap v1.5.0
+	github.com/hyp3rd/ewrap v1.5.1
 )
 
 require (
