@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	github.com/gofiber/fiber/v3 v3.2.0
-	github.com/hyp3rd/ewrap v1.4.0
+	github.com/hyp3rd/ewrap v1.5.0
 )
 
 require (
