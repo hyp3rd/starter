@@ -15,8 +15,8 @@ github.com/gofiber/utils/v2 v2.1.1 h1:kGnoGjwEnFW6w0x45W+kLlmMJvqBGkuUA4oMWKn/T/
 github.com/gofiber/utils/v2 v2.1.1/go.mod h1:DdOgEVwQTi8cou/AKWPqhXOR4fHGRVhA/rEWL3IXG7Q=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/hyp3rd/ewrap v1.5.1 h1:rnLaig+rnpBYkL7vQsvLUJGQpCLa/Yl5RRAnWjphJPs=
-github.com/hyp3rd/ewrap v1.5.1/go.mod h1:Pbote45XDYyodYzdcUH7xnWmnI6SSewbOYtTlRSsfvw=
+github.com/hyp3rd/ewrap v1.5.2 h1:JeTKz6KeCJISg1nwzjEWvv9G16U1JMm0Yt4Vj8jdaHk=
+github.com/hyp3rd/ewrap v1.5.2/go.mod h1:SmAVKUTUalVIYoAcPP9WpClOnl29rIKM7D3oPpG5jik=
 github.com/klauspost/compress v1.19.0 h1:sXLILfc9jV2QYWkzFOPWStmcUVH2RHEB1JCdY2oVvCQ=
 github.com/klauspost/compress v1.19.0/go.mod h1:cwPg85FWrGar70rWktvGQj8/hthj3wpl0PGDogxkrSQ=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
